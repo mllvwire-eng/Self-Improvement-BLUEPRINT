@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>The Rebuild Blueprint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,400&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#070707;
+    --panel:#131313;
+    --panel-2:#181818;
+    --ink:#ffffff;
+    --ink-muted:#8c8c8c;
+    --hair:#2b2b2b;
+    --gold:#e0263f;
+    --plum:#ff6b7a;
+    --sage:#a81328;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{
+    height:100%;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Work Sans',sans-serif;
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  .deck{
+    position:relative;
+    height:100dvh;
+    width:100vw;
+    max-width:520px;
+    margin:0 auto;
+    display:flex;
+    flex-direction:column;
+    background:
+      radial-gradient(600px 300px at 85% -10%, rgba(224,38,63,0.12), transparent 60%),
+      var(--bg);
+  }
+  .slides{
+    position:relative;
+    flex:1 1 auto;
+    min-height:0;
+    overflow:hidden;
+  }
+  .slide{
+    position:absolute;
+    inset:0;
+    opacity:0;
+    transform:translateY(24px) scale(0.98);
+    pointer-events:none;
+    transition:opacity 0.6s cubic-bezier(.22,.61,.36,1), transform 0.6s cubic-bezier(.22,.61,.36,1);
+    overflow:hidden;
+  }
+  .slide-inner{
+    height:100%;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    padding:56px 32px 40px;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    touch-action:pan-y;
+  }
+  .slide.active{
+    opacity:1;
+    transform:none;
+    pointer-events:auto;
+  }
+  .slide.leaving{
+    opacity:0;
+    transform:translateY(-24px) scale(0.98);
+  }
+
+  .eyebrow{
+    font-size:12.5px;
+    letter-spacing:0.04em;
+    color:var(--ink-muted);
+    margin-bottom:18px;
+  }
+  .eyebrow b{color:var(--gold);font-weight:600;}
+
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:400;
+    font-size:38px;
+    line-height:1.08;
+    letter-spacing:-0.01em;
+  }
+  h2{
+    font-family:'Fraunces',serif;
+    font-weight:400;
+    font-size:30px;
+    line-height:1.12;
+    letter-spacing:-0.01em;
+    margin-bottom:6px;
+  }
+  .sub{
+    font-size:15.5px;
+    color:var(--ink-muted);
+    line-height:1.55;
+    margin-top:14px;
+    max-width:38ch;
+  }
+
+  /* cover */
+  #s0{justify-content:center;}
+  #s0 .mark{
+    width:44px;height:44px;border-radius:50%;
+    border:1px solid var(--hair);
+    display:flex;align-items:center;justify-content:center;
+    margin-bottom:40px;
+  }
+  #s0 .mark::after{
+    content:'';
+    width:10px;height:10px;border-radius:50%;
+    background:var(--gold);
+  }
+  #s0 h1{font-size:44px;}
+  #s0 .tag{
+    margin-top:22px;
+    font-size:16px;
+    color:var(--ink-muted);
+    max-width:30ch;
+    line-height:1.5;
+  }
+  #s0 .start{
+    margin-top:56px;
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    font-size:14px;
+    color:var(--gold);
+    width:fit-content;
+    border-bottom:1px solid rgba(201,162,75,0.35);
+    padding-bottom:6px;
+  }
+
+  /* generic content slide */
+  .kicker{
+    font-size:13px;
+    color:var(--ink-muted);
+    margin-bottom:8px;
+  }
+  .practices{
+    margin-top:28px;
+    display:flex;
+    flex-direction:column;
+    gap:0;
+  }
+  .practice{
+    padding:18px 0;
+    border-top:1px solid var(--hair);
+  }
+  .practice:last-child{border-bottom:1px solid var(--hair);}
+  .practice .row{
+    display:flex;
+    align-items:baseline;
+    gap:14px;
+  }
+  .practice .n{
+    font-family:'Fraunces',serif;
+    font-size:15px;
+    color:var(--accent, var(--gold));
+    min-width:20px;
+  }
+  .practice h3{
+    font-family:'Work Sans',sans-serif;
+    font-weight:500;
+    font-size:16.5px;
+  }
+  .practice p{
+    margin-top:6px;
+    margin-left:34px;
+    font-size:14px;
+    color:var(--ink-muted);
+    line-height:1.55;
+    max-width:36ch;
+  }
+
+  .pillar-tag{
+    display:inline-block;
+    font-size:11.5px;
+    letter-spacing:0.03em;
+    color:var(--accent, var(--gold));
+    border:1px solid var(--accent, var(--gold));
+    border-radius:100px;
+    padding:5px 12px;
+    margin-bottom:22px;
+    width:fit-content;
+  }
+
+  /* roadmap slide */
+  .track{
+    margin-top:30px;
+    position:relative;
+    padding-left:22px;
+  }
+  .track::before{
+    content:'';
+    position:absolute;
+    left:5px;top:6px;bottom:6px;
+    width:1px;
+    background:var(--hair);
+  }
+  .stage{
+    position:relative;
+    padding-bottom:26px;
+  }
+  .stage:last-child{padding-bottom:0;}
+  .stage::before{
+    content:'';
+    position:absolute;
+    left:-22px;top:4px;
+    width:9px;height:9px;
+    border-radius:50%;
+    background:var(--bg);
+    border:1.5px solid var(--gold);
+  }
+  .stage .days{font-size:12px;color:var(--ink-muted);margin-bottom:3px;}
+  .stage h4{font-family:'Work Sans',sans-serif;font-weight:500;font-size:15.5px;}
+  .stage p{font-size:13.5px;color:var(--ink-muted);margin-top:4px;line-height:1.5;}
+
+  /* closing */
+  #s6{justify-content:center;}
+  #s6 .big{
+    font-family:'Fraunces',serif;
+    font-size:34px;
+    line-height:1.15;
+  }
+  #s6 .cta{
+    margin-top:36px;
+    background:var(--gold);
+    color:#ffffff;
+    border:none;
+    font-family:'Work Sans',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    padding:16px 22px;
+    border-radius:8px;
+    width:100%;
+    max-width:280px;
+  }
+  #s6 .note{
+    margin-top:16px;
+    font-size:13px;
+    color:var(--ink-muted);
+  }
+
+  /* chrome: progress + nav */
+  .chrome{
+    position:relative;
+    flex:0 0 auto;
+    padding:16px 32px 28px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    background:var(--bg);
+    border-top:1px solid var(--hair);
+  }
+  .progress{
+    display:flex;
+    gap:6px;
+  }
+  .progress .bar{
+    height:2.5px;
+    flex:1;
+    background:var(--hair);
+    border-radius:2px;
+    overflow:hidden;
+  }
+  .progress .bar span{
+    display:block;
+    height:100%;
+    width:0%;
+    background:var(--gold);
+    transition:width 0.4s ease;
+  }
+  .progress .bar.done span{width:100%;}
+  .navrow{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .navrow .lbl{
+    font-size:12.5px;
+    color:var(--ink-muted);
+  }
+  .navrow .btns{display:flex;gap:10px;}
+  .navbtn{
+    width:42px;height:42px;
+    border-radius:50%;
+    border:1px solid var(--hair);
+    background:var(--panel);
+    color:var(--ink);
+    display:flex;align-items:center;justify-content:center;
+    font-size:16px;
+  }
+  .navbtn:disabled{opacity:0.3;}
+
+  @media (prefers-reduced-motion: reduce){
+    .slide{transition:opacity 0.2s linear; transform:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+<div class="slides">
+
+  <!-- 0 cover -->
+  <section class="slide active" id="s0"><div class="slide-inner">
+    <div class="mark"></div>
+    <h1>The Rebuild<br>Blueprint</h1>
+    <p class="tag">A working plan for reshaping how you think, how you feel, and how you earn — in that order.</p>
+    <div class="start">Begin →</div>
+  </div></section>
+
+  <!-- 1 welcome -->
+  <section class="slide" id="s1"><div class="slide-inner">
+    <div class="eyebrow">Before you start</div>
+    <h2>Three levers, one system</h2>
+    <p class="sub">Most people try to fix money, health, and mindset as three separate problems. They're not. Energy funds discipline, discipline funds income, and income removes the stress that was draining your energy in the first place. This blueprint moves through all three, in the order that actually compounds.</p>
+    <div class="practices" style="margin-top:36px;">
+      <div class="practice">
+        <div class="row"><span class="n" style="color:var(--plum)">01</span><h3>Mindset &amp; Life Design</h3></div>
+        <p>The operating system everything else runs on.</p>
+      </div>
+      <div class="practice">
+        <div class="row"><span class="n" style="color:var(--sage)">02</span><h3>Health &amp; Energy</h3></div>
+        <p>The fuel that makes the plan sustainable.</p>
+      </div>
+      <div class="practice">
+        <div class="row"><span class="n" style="color:var(--gold)">03</span><h3>Money &amp; Income</h3></div>
+        <p>What the first two make possible.</p>
+      </div>
+    </div>
+  </div></section>
+
+  <!-- 2 mindset -->
+  <section class="slide" id="s2" style="--accent:var(--plum)"><div class="slide-inner">
+    <div class="pillar-tag">Pillar 01 — Mindset</div>
+    <h2>Rebuild the operating system</h2>
+    <p class="sub" style="margin-top:0;">You don't need more motivation. You need fewer decisions standing between you and the next right action.</p>
+    <div class="practices">
+      <div class="practice">
+        <div class="row"><span class="n">1</span><h3>Define one identity, not five goals</h3></div>
+        <p>Pick who you're becoming this quarter. Every action gets judged against it.</p>
+      </div>
+      <div class="practice">
+        <div class="row"><span class="n">2</span><h3>Shrink the decision, not the ambition</h3></div>
+        <p>Big goals stall on daily friction. Design the smallest version you can't skip.</p>
+      </div>
+      <div class="practice">
+        <div class="row"><span class="n">3</span><h3>Review weekly, not daily</h3></div>
+        <p>Daily self-judgment burns you out. A weekly 10-minute review catches drift early.</p>
+      </div>
+    </div>
+  </div></section>
+
+  <!-- 3 health -->
+  <section class="slide" id="s3" style="--accent:var(--sage)"><div class="slide-inner">
+    <div class="pillar-tag">Pillar 02 — Health</div>
+    <h2>Protect the fuel supply</h2>
+    <p class="sub" style="margin-top:0;">Nothing else on this list works if you're running on empty. Health isn't a side quest here — it's the budget everything else spends from.</p>
+    <div class="practices">
+      <div class="practice">
+        <div class="row"><span class="n">1</span><h3>Fix sleep before diet</h3></div>
+        <p>A consistent wake time does more for energy and willpower than any meal plan.</p>
+      </div>
+      <div class="practice">
+        <div class="row"><span class="n">2</span><h3>Move daily, train weekly</h3></div>
+        <p>A short daily walk or stretch keeps energy stable; save intensity for 3 sessions a week.</p>
+      </div>
+      <div class="practice">
+        <div class="row"><span class="n">3</span><h3>Build a floor, not a streak</h3></div>
+        <p>Define the minimum you'll do on your worst day. Streaks break; floors hold.</p>
+      </div>
+    </div>
+  </div></section>
+
+  <!-- 4 money -->
+  <section class="slide" id="s4" style="--accent:var(--gold)"><div class="slide-inner">
+    <div class="pillar-tag">Pillar 03 — Money</div>
+    <h2>Turn capacity into income</h2>
+    <p class="sub" style="margin-top:0;">With mindset and energy in place, income becomes a systems problem — not a hustle problem.</p>
+    <div class="practices">
+      <div class="practice">
+        <div class="row"><span class="n">1</span><h3>Audit before you optimize</h3></div>
+        <p>Know exactly where every dollar goes before changing anything. Most leaks are invisible.</p>
+      </div>
+      <div class="practice">
+        <div class="row"><span class="n">2</span><h3>Build one income lever at a time</h3></div>
+        <p>Pick a single skill, offer, or asset to develop for 90 days before adding a second.</p>
+      </div>
+      <div class="practice">
+        <div class="row"><span class="n">3</span><h3>Automate the boring 80%</h3></div>
+        <p>Savings, bill pay, investing — remove willpower from anything that should be automatic.</p>
+      </div>
+    </div>
+  </div></section>
+
+  <!-- 5 roadmap -->
+  <section class="slide" id="s5"><div class="slide-inner">
+    <div class="eyebrow">Putting it together</div>
+    <h2>Your 90-day sequence</h2>
+    <div class="track">
+      <div class="stage">
+        <div class="days">Days 1–30</div>
+        <h4>Stabilize</h4>
+        <p>Fix sleep and a daily floor. Define your identity statement.</p>
+      </div>
+      <div class="stage">
+        <div class="days">Days 31–60</div>
+        <h4>Build capacity</h4>
+        <p>Add weekly training. Run the full money audit.</p>
+      </div>
+      <div class="stage">
+        <div class="days">Days 61–90</div>
+        <h4>Compound</h4>
+        <p>Launch one income lever. Start weekly reviews across all three pillars.</p>
+      </div>
+    </div>
+  </div></section>
+
+  <!-- 6 close -->
+  <section class="slide" id="s6"><div class="slide-inner">
+    <div class="big">You don't need<br>a new plan.<br>You need this one,<br>run properly.</div>
+    <button class="cta">Get the full workbook</button>
+    <div class="note">Swap this for your checkout or download link.</div>
+  </div></section>
+
+</div>
+
+  <div class="chrome">
+    <div class="progress" id="progress"></div>
+    <div class="navrow">
+      <div class="lbl" id="lbl">1 / 7</div>
+      <div class="btns">
+        <button class="navbtn" id="prev">‹</button>
+        <button class="navbtn" id="next">›</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const total = slides.length;
+  let i = 0;
+
+  const progressEl = document.getElementById('progress');
+  slides.forEach(() => {
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+    bar.innerHTML = '<span></span>';
+    progressEl.appendChild(bar);
+  });
+  const bars = Array.from(progressEl.children);
+
+  const lbl = document.getElementById('lbl');
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+
+  function render(newIndex, dir){
+    if(newIndex === i) return;
+    const cur = slides[i];
+    const nxt = slides[newIndex];
+    cur.classList.add('leaving');
+    cur.classList.remove('active');
+    setTimeout(()=>{ cur.classList.remove('leaving'); }, 600);
+    nxt.style.transform = dir === 'fwd' ? 'translateY(24px) scale(0.98)' : 'translateY(-24px) scale(0.98)';
+    nxt.offsetHeight;
+    requestAnimationFrame(()=>{ nxt.classList.add('active'); nxt.style.transform = ''; });
+    i = newIndex;
+    bars.forEach((b, idx)=> b.classList.toggle('done', idx < i+1));
+    lbl.textContent = (i+1) + ' / ' + total;
+    prevBtn.disabled = i === 0;
+    nextBtn.disabled = i === total - 1;
+  }
+
+  bars[0].classList.add('done');
+  prevBtn.disabled = true;
+
+  nextBtn.addEventListener('click', ()=>{ if(i < total-1) render(i+1, 'fwd'); });
+  prevBtn.addEventListener('click', ()=>{ if(i > 0) render(i-1, 'back'); });
+
+  let touchX = null;
+  document.addEventListener('touchstart', e=>{ touchX = e.touches[0].clientX; });
+  document.addEventListener('touchend', e=>{
+    if(touchX === null) return;
+    const dx = e.changedTouches[0].clientX - touchX;
+    if(Math.abs(dx) > 50){
+      if(dx < 0 && i < total-1) render(i+1, 'fwd');
+      if(dx > 0 && i > 0) render(i-1, 'back');
+    }
+    touchX = null;
+  });
+
+  document.addEventListener('keydown', e=>{
+    if(e.key === 'ArrowRight' && i < total-1) render(i+1, 'fwd');
+    if(e.key === 'ArrowLeft' && i > 0) render(i-1, 'back');
+  });
+</script>
+
+</body>
+</html>
